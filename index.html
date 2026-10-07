@@ -117,12 +117,20 @@ footer{font-size:12.5px;color:var(--muted);max-width:75ch}
  .mbar b{font:700 22px var(--display);font-variant-numeric:tabular-nums}
  body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
 }
+
+.topnav{display:flex;gap:16px;justify-content:flex-end;align-items:center;flex-wrap:wrap;font-size:14px}
+.topnav a{color:var(--fg);text-decoration:none;font-weight:500}
+.topnav a.pill{background:var(--accent);color:#fff;padding:7px 12px;border-radius:8px}
+header{max-width:none}
+header > :not(.topnav){max-width:68ch}
+.ctaline{display:inline-block;margin-top:10px;color:var(--accent);font-weight:600;text-decoration:none}
 </style>
 </head>
 <body>
 
 <div class="wrap">
   <header>
+    <nav class="topnav"><a href="/tarifs">Tarifs</a><a href="/connexion#connexion">Se connecter</a><a class="pill" href="/connexion">Créer un compte</a></nav>
     <div class="brand">
       <svg viewBox="0 0 32 32" aria-hidden="true"><rect x="2" y="2" width="28" height="28" rx="8" fill="var(--accent)"/><path d="M9 22V11l7 7 7-7v11" fill="none" stroke="var(--surface)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
       Margia
@@ -202,7 +210,7 @@ footer{font-size:12.5px;color:var(--muted);max-width:75ch}
   <section class="more" aria-label="Pourquoi ce calcul">
     <div><h2>Le chiffre que Shopify ne montre pas</h2><p>Ton tableau de bord affiche un chiffre d'affaires. Il ne déduit ni la pub, ni les remboursements, ni l'URSSAF prélevée sur chaque euro encaissé.</p></div>
     <div><h2>Le CPA max, ta vraie limite</h2><p>Au-delà de ce coût pub par vente, chaque commande te fait perdre de l'argent. C'est le seuil à surveiller dans Meta Ads et Google Ads.</p></div>
-    <div><h2>Bientôt : en automatique</h2><p>Margia se connectera à ta boutique pour calculer ce bénéfice net chaque jour, produit par produit, et t'alerter quand un produit passe dans le rouge.</p></div>
+    <div><h2>Suis tous tes produits</h2><p>Margia se connectera à ta boutique pour calculer ce bénéfice net chaque jour, produit par produit, et t'alerter quand un produit passe dans le rouge.</p><a class="ctaline" href="/connexion">Suivre mes produits gratuitement →</a></div>
   </section>
 
 

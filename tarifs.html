@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tarifs | Margia</title>
+<meta name="description" content="Margia gratuit jusqu'à 3 produits. Pro à 7 € par mois au prix de lancement, garanti à vie pour les 100 premiers abonnés.">
+<link rel="canonical" href="https://margia2.vercel.app/tarifs">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/assets/base.css">
+<style>
+.plans{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;max-width:820px;perspective:1400px}
+@media (max-width:700px){.plans{grid-template-columns:1fr}}
+.plan{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:14px;transition:transform .25s ease-out}
+.plan.pro{border:2px solid var(--accent);box-shadow:var(--shadow);transform:translateZ(14px)}
+.plan h2{font:700 22px var(--display);margin:0}
+.price{display:flex;align-items:baseline;gap:8px}
+.price b{font:700 44px/1 var(--display);letter-spacing:-.03em}
+.price s{color:var(--muted);font:500 18px var(--mono)}
+.price span{color:var(--muted)}
+.badge{width:fit-content;font-size:12px;font-weight:600;padding:4px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent)}
+.plan ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;font-size:14.5px}
+.plan li{display:grid;grid-template-columns:18px 1fr;gap:8px}
+.plan li::before{content:"✓";color:var(--pos);font-weight:700}
+.plan li.soon::before{content:"◷";color:var(--muted)}
+.cta{display:block;text-align:center;text-decoration:none;border-radius:10px;padding:12px;font-weight:600;margin-top:auto}
+.cta.main{background:var(--accent);color:#fff}
+.cta.sec{background:var(--sunk);color:var(--fg)}
+nav.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+nav.top a{color:var(--fg);text-decoration:none;font-weight:500}
+nav.top .links{display:flex;gap:16px;align-items:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav class="top"><a class="brand" href="/"><svg viewBox="0 0 32 32" aria-hidden="true" width="28" height="28"><rect x="2" y="2" width="28" height="28" rx="8" fill="var(--accent)"/><path d="M9 22V11l7 7 7-7v11" fill="none" stroke="var(--surface)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Margia</a>
+    <span class="links"><a href="/">Simulateur</a><a href="/connexion#connexion">Se connecter</a></span></nav>
+  <header><h1>Un prix qui se rembourse dès la première pub coupée</h1>
+    <p class="lede">Un seul produit déficitaire repéré à temps te fait économiser plus qu'un an d'abonnement.</p></header>
+  <div class="plans">
+    <div class="plan">
+      <h2>Gratuit</h2>
+      <div class="price"><b>0 €</b><span>pour toujours</span></div>
+      <ul>
+        <li>Jusqu'à 3 produits suivis</li>
+        <li>Bénéfice net, marge et CPA max par produit</li>
+        <li>URSSAF, versement libératoire et TVA intégrés</li>
+      </ul>
+      <a class="cta sec" href="/connexion">Créer un compte gratuit</a>
+    </div>
+    <div class="plan pro">
+      <span class="badge">Prix de lancement : 100 premiers abonnés</span>
+      <h2>Pro</h2>
+      <div class="price"><b>7 €</b><span>/ mois</span><s>12 €</s></div>
+      <p class="note">Garanti à vie tant que l'abonnement reste actif. Ensuite 12 €/mois pour les nouveaux abonnés. Sans engagement.</p>
+      <ul>
+        <li>Produits illimités</li>
+        <li>Toutes les boutiques au même endroit</li>
+        <li class="soon">Connexion Shopify : calcul automatique chaque jour</li>
+        <li class="soon">Alertes quand un produit passe dans le rouge</li>
+      </ul>
+      <a class="cta main" href="/connexion">Commencer gratuitement</a>
+      <p class="note">Le paiement Pro ouvre très bientôt. Crée ton compte gratuit maintenant : tu seras prévenu par email et le prix de lancement te sera réservé.</p>
+    </div>
+  </div>
+  <section class="faq">
+    <h2>Questions sur l'abonnement</h2>
+    <details><summary>Puis-je annuler quand je veux ?</summary><p>Oui, l'abonnement est sans engagement et s'arrête à la fin du mois en cours.</p></details>
+    <details><summary>Que se passe-t-il si j'arrête le Pro ?</summary><p>Tu repasses en gratuit et gardes l'accès à tes 3 premiers produits. Rien n'est supprimé.</p></details>
+    <details><summary>Le prix de 7 € augmentera-t-il ?</summary><p>Pas pour les 100 premiers abonnés tant que leur abonnement reste actif.</p></details>
+  </section>
+  <footer>Margia n'est pas un cabinet comptable. Les montants sont des estimations à vérifier avec tes déclarations.</footer>
+</div>
+</body>
+</html>
