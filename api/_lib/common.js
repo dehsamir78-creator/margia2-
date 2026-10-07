@@ -2,6 +2,8 @@
 const crypto = require("crypto");
 
 const env = (k) => process.env[k] || "";
+const webhookReady = () =>
+  !!(env("STRIPE_WEBHOOK_SECRET") && env("SUPABASE_URL") && env("SUPABASE_SERVICE_ROLE_KEY"));
 const billingReady = () =>
   !!(env("STRIPE_SECRET_KEY") && env("STRIPE_PRICE_ID") && env("SUPABASE_URL") && env("SUPABASE_SERVICE_ROLE_KEY"));
 
@@ -90,4 +92,4 @@ function origin(req) {
   return env("SITE_URL") || "https://" + req.headers.host;
 }
 
-module.exports = { env, billingReady, send, getUser, db, stripe, verifyStripeSignature, readRaw, origin };
+module.exports = { env, webhookReady, billingReady, send, getUser, db, stripe, verifyStripeSignature, readRaw, origin };

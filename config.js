@@ -2,5 +2,6 @@
 // Ne JAMAIS mettre la clé service_role ici.
 window.MARGIA_CONFIG = {
   supabaseUrl: "https://eomyycbutsbophrtznya.supabase.co",
+  paymentLink: "https://buy.stripe.com/00w28r28m11I1ClbUu3Nm00",
   supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVvbXl5Y2J1dHNib3BocnR6bnlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTEzOTkzMDQsImV4cCI6MjEwNjk3NTMwNH0.MvJqoeTRGFzeTgL_w33-lp7abcydPZDBn3agD-UJVP4"
 };

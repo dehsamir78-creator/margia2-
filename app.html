@@ -200,15 +200,15 @@ tr:last-child td{border-bottom:0}
   async function load(){
     var pr=await sb.from("profiles").select("*").eq("id",user.id).maybeSingle();
     if(pr.data)profile=pr.data;
-    $("plan").textContent=profile.plan==="pro"?"Plan Pro":"Plan gratuit";$("upgrade").hidden=!(billing&&profile.plan!=="pro");$("billing").hidden=!(billing&&profile.stripe_customer_id);$("upgrade2").hidden=$("upgrade").hidden;$("billing2").hidden=$("billing").hidden;$("plan2").textContent=$("plan").textContent;
+    $("plan").textContent=profile.plan==="pro"?"Plan Pro":"Plan gratuit";$("upgrade").hidden=!(billing&&profile.plan!=="pro");$("billing").hidden=!(portal&&profile.stripe_customer_id);$("upgrade2").hidden=$("upgrade").hidden;$("billing2").hidden=$("billing").hidden;$("plan2").textContent=$("plan").textContent;
     var r=await sb.from("products").select("*").order("created_at",{ascending:true});
     if(r.error)return gerr("Impossible de charger tes produits. Recharge la page.");
     gerr("");products=r.data;render();
     $("s-urssaf").value=profile.urssaf_rate;$("s-cfp").value=profile.cfp_rate;$("s-vl").checked=profile.liberatoire;$("s-tva").checked=profile.vat_registered;
   }
 
-  var billing=false;
-  try{billing=(await (await fetch("/api/config",{cache:"no-store"})).json()).billing}catch(_){}
+  var billing=false,portal=false,payLink=(window.MARGIA_CONFIG||{}).paymentLink||"";
+  try{var bc=await (await fetch("/api/config",{cache:"no-store"})).json();portal=!!bc.portal;billing=!!bc.billing||(!!bc.link&&!!payLink)}catch(_){}
   async function goBilling(path,btn){
     btn.disabled=true;gerr("");
     try{var t=(await sb.auth.getSession()).data.session.access_token;
@@ -217,7 +217,9 @@ tr:last-child td{border-bottom:0}
     }catch(_){gerr("Connexion impossible. Réessaie.")}
     btn.disabled=false;
   }
-  $("upgrade").onclick=$("upgrade2").onclick=function(){track("checkout_start");goBilling("/api/checkout",$("upgrade"))};
+  $("upgrade").onclick=$("upgrade2").onclick=function(){track("checkout_start");
+    if(payLink&&!portal){location.href=payLink+"?client_reference_id="+encodeURIComponent(user.id)+"&prefilled_email="+encodeURIComponent(user.email);return}
+    goBilling("/api/checkout",$("upgrade"))};
   $("billing").onclick=$("billing2").onclick=function(){goBilling("/api/portal",$("billing"))};
   if(/abonnement=ok/.test(location.search)){$("gok").textContent="Paiement reçu. Ton plan Pro s'active dans quelques secondes.";$("gok").hidden=false;setTimeout(load,4000)}
   var F=["name","price","cogs","cpa","refund","payp","payf","fixed","orders"];

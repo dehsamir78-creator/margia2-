@@ -27,6 +27,19 @@ module.exports = async (req, res) => {
   try { event = JSON.parse(raw); } catch { return send(res, 400, { error: "JSON invalide" }); }
   try {
     switch (event.type) {
+      case "checkout.session.completed": {
+        // Paiement via lien Stripe : client_reference_id = identifiant Margia de l'utilisateur
+        const s = event.data.object;
+        const uid = s.client_reference_id;
+        if (uid && /^[0-9a-f-]{36}$/i.test(uid) && s.mode === "subscription") {
+          await db("profiles?id=eq." + uid, {
+            method: "PATCH",
+            body: JSON.stringify({ stripe_customer_id: s.customer, plan: s.payment_status === "paid" ? "pro" : "free", subscription_status: s.payment_status === "paid" ? "active" : s.payment_status }),
+          });
+          await db("events", { method: "POST", body: JSON.stringify({ user_id: uid, name: "subscription_active" }) });
+        }
+        break;
+      }
       case "customer.subscription.created":
       case "customer.subscription.updated":
       case "customer.subscription.deleted":
