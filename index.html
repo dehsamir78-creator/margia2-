@@ -106,6 +106,17 @@ footer{font-size:12.5px;color:var(--muted);max-width:75ch}
 .faq details{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px}
 .faq summary{cursor:pointer;font-weight:600}
 .faq p{margin:10px 0 0;color:var(--muted);max-width:68ch}
+
+.mbar{display:none}
+@media (max-width:820px){
+ .mbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:10;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -10px 30px -12px rgba(0,0,0,.35)}
+ .mbar button{font:600 14px var(--body);color:var(--accent);background:var(--accent-soft);border:0;border-radius:8px;padding:9px 12px;cursor:pointer}
+ .mbar .v{display:flex;flex-direction:column;line-height:1.2}
+ .mbar small{color:var(--muted);font-size:12px}
+ .mbar b{font:700 22px var(--display);font-variant-numeric:tabular-nums}
+ body{padding-bottom:calc(96px + env(safe-area-inset-bottom,0px))}
+}
 </style>
 </head>
 <body>
@@ -206,6 +217,7 @@ footer{font-size:12.5px;color:var(--muted);max-width:75ch}
   <footer>Margia n'est pas un cabinet comptable. Les taux par défaut correspondent au régime micro-social 2026 pour la vente de marchandises ; ton cas peut différer (ACRE, franchise de TVA, activité mixte).</footer>
 </div>
 
+<div class="mbar" id="mbar"><div class="v"><small>Bénéfice net / commande</small><b id="mnet">–</b></div><button type="button" id="mgo">Voir le détail</button></div>
 <script>
 (function(){
   var ids=["price","cogs","cpa","refund","payp","payf","fixed","orders","urssaf","cfp"];
@@ -232,7 +244,7 @@ footer{font-size:12.5px;color:var(--muted);max-width:75ch}
   function render(){
     var i={};ids.forEach(function(k){i[k]=num(k)});i.vl=$("vl").checked;i.tva=$("tva").checked;
     var r=compute(i);
-    var net=$("net");net.textContent=eur.format(r.net);net.className="big "+(r.net>=0?"pos":"neg");
+    var net=$("net");net.textContent=eur.format(r.net);net.className="big "+(r.net>=0?"pos":"neg");var mn=$("mnet");mn.textContent=eur.format(r.net);mn.style.color=r.net>=0?"var(--pos)":"var(--neg)";
     var v=$("verdict");
     if(r.net<0){v.className="verdict neg";v.textContent="Tu perds de l'argent à chaque vente"}
     else if(r.margin<0.10){v.className="verdict warn";v.textContent="Rentable, mais marge fragile"}
@@ -261,6 +273,7 @@ footer{font-size:12.5px;color:var(--muted);max-width:75ch}
   }
   $("f").addEventListener("input",render);$("f").addEventListener("submit",function(e){e.preventDefault()});
   render();
+  $("mgo").addEventListener("click",function(){$("ticket").scrollIntoView({behavior:"smooth",block:"start"})});
 
   var t=$("ticket"),reduce=window.matchMedia("(prefers-reduced-motion: reduce)").matches,fine=window.matchMedia("(pointer:fine)").matches;
   if(!reduce&&fine){
