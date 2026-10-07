@@ -61,16 +61,17 @@ tr:last-child td{border-bottom:0}
 </style>
 </head>
 <body>
-<div class="mtop"><span class="brand">Margia</span><nav><button data-v="products" aria-current="page">Produits</button><button data-v="settings">Réglages</button><button data-v="help">Aide</button></nav></div>
+<div class="mtop"><span class="brand">Margia</span><nav><button data-v="products" aria-current="page">Produits</button><button data-v="settings">Compte</button><button data-v="help">Aide</button></nav></div>
 <div class="shell">
   <aside>
     <a class="brand" href="/" style="color:inherit;text-decoration:none"><svg viewBox="0 0 32 32" aria-hidden="true" width="26" height="26"><rect x="2" y="2" width="28" height="28" rx="8" fill="var(--accent)"/><path d="M9 22V11l7 7 7-7v11" fill="none" stroke="var(--surface)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Margia</a>
     <nav><button data-v="products" aria-current="page">Mes produits</button><button data-v="settings">Réglages fiscaux</button><button data-v="help">Aide</button></nav>
-    <div class="who"><span id="who">–</span><span id="plan"></span><button class="btn ghost" id="logout" type="button">Se déconnecter</button></div>
+    <div class="who"><span id="who">–</span><span id="plan"></span><button class="btn" id="upgrade" type="button" hidden>Passer en Pro, 7 €/mois</button><button class="btn ghost" id="billing" type="button" hidden>Gérer mon abonnement</button><button class="btn ghost" id="logout" type="button">Se déconnecter</button></div>
   </aside>
 
   <main class="main">
     <div class="msg err" id="gerr" hidden></div>
+    <div class="msg ok" id="gok" hidden></div>
 
     <section class="view" id="v-products">
       <div class="top"><h1>Mes produits</h1><button class="btn" id="add" type="button">Ajouter un produit</button></div>
@@ -128,6 +129,11 @@ tr:last-child td{border-bottom:0}
           <div class="formbar"><button class="btn" type="submit">Enregistrer</button></div>
         </fieldset></form>
       </div>
+      <div class="panel" style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+        <legend>Compte</legend>
+        <span id="who2" style="word-break:break-all"></span><span id="plan2" class="note"></span>
+        <div class="formbar" style="justify-content:flex-start"><button class="btn" id="upgrade2" type="button" hidden>Passer en Pro, 7 €/mois</button><button class="btn ghost" id="billing2" type="button" hidden>Gérer mon abonnement</button><button class="btn ghost" id="logout2" type="button">Se déconnecter</button></div>
+      </div>
     </section>
 
     <section class="view" id="v-help" hidden>
@@ -154,7 +160,7 @@ tr:last-child td{border-bottom:0}
   var user=s.data.session.user, profile={urssaf_rate:12.3,cfp_rate:0.1,liberatoire:false,vat_registered:false,plan:"free"}, products=[], editing=null;
   $("who").textContent=user.email;
   sb.auth.onAuthStateChange(function(ev){if(ev==="SIGNED_OUT")location.replace("/connexion#connexion")});
-  $("logout").onclick=function(){sb.auth.signOut()};
+  $("logout").onclick=$("logout2").onclick=function(){sb.auth.signOut()};$("who2").textContent=user.email;
 
   function gerr(t){$("gerr").textContent=t;$("gerr").hidden=!t}
   function views(v){["products","settings","help"].forEach(function(k){$("v-"+k).hidden=k!==v});
@@ -194,12 +200,26 @@ tr:last-child td{border-bottom:0}
   async function load(){
     var pr=await sb.from("profiles").select("*").eq("id",user.id).maybeSingle();
     if(pr.data)profile=pr.data;
-    $("plan").textContent=profile.plan==="pro"?"Plan Pro":"Plan gratuit";
+    $("plan").textContent=profile.plan==="pro"?"Plan Pro":"Plan gratuit";$("upgrade").hidden=!(billing&&profile.plan!=="pro");$("billing").hidden=!(billing&&profile.stripe_customer_id);$("upgrade2").hidden=$("upgrade").hidden;$("billing2").hidden=$("billing").hidden;$("plan2").textContent=$("plan").textContent;
     var r=await sb.from("products").select("*").order("created_at",{ascending:true});
     if(r.error)return gerr("Impossible de charger tes produits. Recharge la page.");
     gerr("");products=r.data;render();
     $("s-urssaf").value=profile.urssaf_rate;$("s-cfp").value=profile.cfp_rate;$("s-vl").checked=profile.liberatoire;$("s-tva").checked=profile.vat_registered;
   }
+
+  var billing=false;
+  try{billing=(await (await fetch("/api/config",{cache:"no-store"})).json()).billing}catch(_){}
+  async function goBilling(path,btn){
+    btn.disabled=true;gerr("");
+    try{var t=(await sb.auth.getSession()).data.session.access_token;
+      var r=await fetch(path,{method:"POST",headers:{Authorization:"Bearer "+t}});var j=await r.json();
+      if(j.url){location.href=j.url;return}gerr(j.error||"Une erreur est survenue.");
+    }catch(_){gerr("Connexion impossible. Réessaie.")}
+    btn.disabled=false;
+  }
+  $("upgrade").onclick=$("upgrade2").onclick=function(){track("checkout_start");goBilling("/api/checkout",$("upgrade"))};
+  $("billing").onclick=$("billing2").onclick=function(){goBilling("/api/portal",$("billing"))};
+  if(/abonnement=ok/.test(location.search)){$("gok").textContent="Paiement reçu. Ton plan Pro s'active dans quelques secondes.";$("gok").hidden=false;setTimeout(load,4000)}
   var F=["name","price","cogs","cpa","refund","payp","payf","fixed","orders"];
   function openForm(p){
     editing=p||null;$("pf-title").textContent=p?"Modifier le produit":"Nouveau produit";$("perr").hidden=true;
