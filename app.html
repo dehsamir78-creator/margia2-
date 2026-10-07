@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tableau de bord | Margia</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/assets/base.css">
+<style>
+body{padding:0}
+.shell{display:grid;grid-template-columns:220px minmax(0,1fr);min-height:100vh}
+aside{background:var(--surface);border-right:1px solid var(--line);padding:20px 14px;display:flex;flex-direction:column;gap:18px}
+aside nav{display:flex;flex-direction:column;gap:4px}
+aside nav button{all:unset;cursor:pointer;padding:9px 12px;border-radius:8px;font-weight:500;color:var(--muted)}
+aside nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+aside nav button:focus-visible{outline:2px solid var(--accent)}
+.who{margin-top:auto;font-size:12.5px;color:var(--muted);display:flex;flex-direction:column;gap:8px;word-break:break-all}
+.main{padding:24px 20px 60px;display:flex;flex-direction:column;gap:22px;max-width:1100px;width:100%}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.top h1{font-size:26px}
+.btn{border:0;border-radius:9px;background:var(--accent);color:#fff;font:600 14px var(--body);padding:10px 14px;cursor:pointer}
+.btn.ghost{background:var(--sunk);color:var(--fg)}
+.btn.danger{background:var(--neg)}
+.btn[disabled]{opacity:.55;cursor:not-allowed}
+.kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kpi b{font-size:22px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+th{text-align:left;font:600 11.5px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
+td{padding:11px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+td.n{font-family:var(--mono)}
+tr:last-child td{border-bottom:0}
+.chip{display:inline-block;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px}
+.chip.pos{background:color-mix(in srgb,var(--pos) 14%,transparent);color:var(--pos)}
+.chip.warn{background:color-mix(in srgb,var(--warn) 16%,transparent);color:var(--warn)}
+.chip.neg{background:color-mix(in srgb,var(--neg) 14%,transparent);color:var(--neg)}
+.acts{display:flex;gap:6px;justify-content:flex-end}
+.acts button{border:0;background:var(--sunk);color:var(--fg);border-radius:7px;padding:6px 10px;cursor:pointer;font:500 13px var(--body)}
+.empty{text-align:center;padding:36px 16px;display:flex;flex-direction:column;align-items:center;gap:12px}
+.empty p{color:var(--muted);margin:0;max-width:46ch}
+.msg{font-size:14px;border-radius:8px;padding:10px 12px}
+.msg.err{background:color-mix(in srgb,var(--neg) 12%,transparent);color:var(--neg)}
+.msg.ok{background:color-mix(in srgb,var(--pos) 12%,transparent);color:var(--pos)}
+.formbar{display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-end}
+.view[hidden]{display:none}
+.mtop{display:none}
+@media (max-width:820px){
+  .shell{grid-template-columns:1fr}
+  aside{display:none}
+  .mtop{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+  .mtop nav{display:flex;gap:4px}
+  .mtop nav button{all:unset;cursor:pointer;padding:7px 10px;border-radius:7px;font-size:13.5px;font-weight:500;color:var(--muted)}
+  .mtop nav button[aria-current="page"]{background:var(--accent-soft);color:var(--accent)}
+  .main{padding:18px 16px 60px}
+  .kpis{grid-template-columns:1fr 1fr}
+}
+</style>
+</head>
+<body>
+<div class="mtop"><span class="brand">Margia</span><nav><button data-v="products" aria-current="page">Produits</button><button data-v="settings">Réglages</button><button data-v="help">Aide</button></nav></div>
+<div class="shell">
+  <aside>
+    <a class="brand" href="/" style="color:inherit;text-decoration:none"><svg viewBox="0 0 32 32" aria-hidden="true" width="26" height="26"><rect x="2" y="2" width="28" height="28" rx="8" fill="var(--accent)"/><path d="M9 22V11l7 7 7-7v11" fill="none" stroke="var(--surface)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Margia</a>
+    <nav><button data-v="products" aria-current="page">Mes produits</button><button data-v="settings">Réglages fiscaux</button><button data-v="help">Aide</button></nav>
+    <div class="who"><span id="who">–</span><span id="plan"></span><button class="btn ghost" id="logout" type="button">Se déconnecter</button></div>
+  </aside>
+
+  <main class="main">
+    <div class="msg err" id="gerr" hidden></div>
+
+    <section class="view" id="v-products">
+      <div class="top"><h1>Mes produits</h1><button class="btn" id="add" type="button">Ajouter un produit</button></div>
+      <div class="kpis" style="margin:16px 0">
+        <div class="kpi"><span>Produits suivis</span><b id="k-count">–</b></div>
+        <div class="kpi"><span>Produits rentables</span><b id="k-ok">–</b></div>
+        <div class="kpi"><span>Bénéfice net / mois estimé</span><b id="k-month">–</b></div>
+      </div>
+      <div class="panel" id="formpanel" hidden>
+        <form id="pf" novalidate>
+          <fieldset>
+            <legend id="pf-title">Nouveau produit</legend>
+            <label for="p-name">Nom du produit<div class="field"><input id="p-name" maxlength="120" placeholder="ex. Harnais anti-traction"></div></label>
+            <div class="row">
+              <label for="p-price">Prix de vente TTC<div class="field"><input id="p-price" inputmode="decimal"><span>€</span></div></label>
+              <label for="p-cogs">Coût fournisseur + livraison<div class="field"><input id="p-cogs" inputmode="decimal"><span>€</span></div></label>
+              <label for="p-cpa">Coût pub par vente<div class="field"><input id="p-cpa" inputmode="decimal"><span>€</span></div></label>
+              <label for="p-refund">Taux de remboursement<div class="field"><input id="p-refund" inputmode="decimal"><span>%</span></div></label>
+              <label for="p-payp">Frais de paiement<div class="field"><input id="p-payp" inputmode="decimal"><span>%</span></div></label>
+              <label for="p-payf">Frais fixes par transaction<div class="field"><input id="p-payf" inputmode="decimal"><span>€</span></div></label>
+              <label for="p-fixed">Charges fixes / mois (part de ce produit)<div class="field"><input id="p-fixed" inputmode="decimal"><span>€</span></div></label>
+              <label for="p-orders">Commandes / mois<div class="field"><input id="p-orders" inputmode="numeric"><span>cmd</span></div></label>
+            </div>
+            <div class="msg err" id="perr" hidden></div>
+            <div class="formbar"><button class="btn ghost" type="button" id="cancel">Annuler</button><button class="btn" type="submit" id="save">Enregistrer</button></div>
+          </fieldset>
+        </form>
+      </div>
+      <div class="panel" id="listpanel">
+        <div id="empty" class="empty" hidden>
+          <h2 style="margin:0;font:700 20px var(--display)">Ajoute ton premier produit</h2>
+          <p>Saisis prix, coût fournisseur et coût pub : Margia calcule ton bénéfice net réel après frais, retours et URSSAF, et te dit jusqu'où tu peux pousser la pub.</p>
+          <button class="btn" type="button" id="add2">Ajouter un produit</button>
+        </div>
+        <div class="tbl" id="tbl" hidden>
+          <table><thead><tr><th>Produit</th><th>Prix</th><th>Net / cmd</th><th>Marge</th><th>CPA max</th><th>Net / mois</th><th>État</th><th></th></tr></thead><tbody id="rows"></tbody></table>
+        </div>
+      </div>
+      <p class="note" id="limitnote" hidden>Plan gratuit : 3 produits maximum. Le plan Pro (produits illimités, connexion Shopify automatique) arrive bientôt.</p>
+    </section>
+
+    <section class="view" id="v-settings" hidden>
+      <div class="top"><h1>Réglages fiscaux</h1></div>
+      <div class="panel" style="margin-top:16px">
+        <form id="sf" novalidate><fieldset>
+          <legend>Micro-entreprise, vente de marchandises</legend>
+          <div class="row">
+            <label for="s-urssaf">Cotisations URSSAF<small>12,3 % en 2026</small><div class="field"><input id="s-urssaf" inputmode="decimal"><span>%</span></div></label>
+            <label for="s-cfp">Formation pro (CFP)<div class="field"><input id="s-cfp" inputmode="decimal"><span>%</span></div></label>
+          </div>
+          <label class="tog" for="s-vl"><input type="checkbox" id="s-vl"><span>Versement libératoire de l'impôt (1 %)</span></label>
+          <label class="tog" for="s-tva"><input type="checkbox" id="s-tva"><span>Je collecte la TVA (20 %)</span></label>
+          <div class="msg ok" id="sok" hidden>Réglages enregistrés.</div>
+          <div class="msg err" id="serr" hidden></div>
+          <div class="formbar"><button class="btn" type="submit">Enregistrer</button></div>
+        </fieldset></form>
+      </div>
+    </section>
+
+    <section class="view" id="v-help" hidden>
+      <div class="top"><h1>Aide</h1></div>
+      <div class="panel faq" style="margin-top:16px">
+        <details open><summary>Comment est calculé le bénéfice net ?</summary><p>Prix de vente moins coût fournisseur, coût pub par vente, frais de paiement, remboursements, part des charges fixes, cotisations URSSAF (et TVA si tu la collectes).</p></details>
+        <details><summary>C'est quoi le CPA max ?</summary><p>Le coût pub par vente au-delà duquel le produit te fait perdre de l'argent. Compare-le au CPA réel affiché dans Meta Ads ou Google Ads.</p></details>
+        <details><summary>Mes données sont-elles privées ?</summary><p>Oui. Chaque compte ne voit que ses propres produits, la base est protégée par des règles d'accès par utilisateur.</p></details>
+        <details><summary>Une question ou un bug ?</summary><p>Écris à <span style="user-select:all">samirdeh782@gmail.com</span>.</p></details>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="/config.js"></script>
+<script src="/assets/sb.js"></script>
+<script>
+(async function(){
+  var $=function(i){return document.getElementById(i)};
+  var eur=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR"}),eur0=new Intl.NumberFormat("fr-FR",{style:"currency",currency:"EUR",maximumFractionDigits:0});
+  if(!window.MARGIA_READY){location.replace("/connexion");return}
+  var s=await sb.auth.getSession(); if(!s.data.session){location.replace("/connexion#connexion");return}
+  var user=s.data.session.user, profile={urssaf_rate:12.3,cfp_rate:0.1,liberatoire:false,vat_registered:false,plan:"free"}, products=[], editing=null;
+  $("who").textContent=user.email;
+  sb.auth.onAuthStateChange(function(ev){if(ev==="SIGNED_OUT")location.replace("/connexion#connexion")});
+  $("logout").onclick=function(){sb.auth.signOut()};
+
+  function gerr(t){$("gerr").textContent=t;$("gerr").hidden=!t}
+  function views(v){["products","settings","help"].forEach(function(k){$("v-"+k).hidden=k!==v});
+    document.querySelectorAll("[data-v]").forEach(function(b){b.setAttribute("aria-current",b.dataset.v===v?"page":"false")})}
+  document.querySelectorAll("[data-v]").forEach(function(b){b.onclick=function(){views(b.dataset.v)}});
+
+  function calc(p){
+    var price=+p.price, ht=profile.vat_registered?price/1.2:price, vat=price-ht;
+    var social=ht*(+profile.urssaf_rate+ +profile.cfp_rate+(profile.liberatoire?1:0))/100;
+    var pay=price*p.pay_pct/100+ +p.pay_fixed, refund=price*p.refund_rate/100, fixedPer=p.orders_monthly>0?p.fixed_monthly/p.orders_monthly:0;
+    var net=price-(+p.cogs+ +p.cpa+pay+refund+fixedPer+social+vat);
+    return {net:net,margin:price>0?net/price:0,cpaMax:+p.cpa+net,month:net*p.orders_monthly};
+  }
+  function render(){
+    var tot=0,ok=0,rows=$("rows");rows.innerHTML="";
+    products.forEach(function(p){
+      var r=calc(p);tot+=r.month;if(r.net>0)ok++;
+      var st=r.net<0?["neg","Déficitaire"]:r.margin<0.10?["warn","Marge fragile"]:["pos","Rentable"];
+      var tr=document.createElement("tr");
+      tr.innerHTML='<td></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td><span class="chip '+st[0]+'"></span></td><td><div class="acts"><button type="button" data-e>Modifier</button><button type="button" data-d>Supprimer</button></div></td>';
+      var c=tr.children;c[0].textContent=p.name;c[1].textContent=eur.format(p.price);c[2].textContent=eur.format(r.net);c[2].style.color=r.net>=0?"var(--pos)":"var(--neg)";
+      c[3].textContent=(r.margin*100).toLocaleString("fr-FR",{maximumFractionDigits:1})+" %";c[4].textContent=r.cpaMax>0?eur.format(r.cpaMax):"aucun";
+      c[5].textContent=eur0.format(r.month);c[6].firstChild.textContent=st[1];
+      tr.querySelector("[data-e]").onclick=function(){openForm(p)};
+      var del=tr.querySelector("[data-d]");del.onclick=async function(){
+        if(del.dataset.confirm!=="1"){del.dataset.confirm="1";del.textContent="Confirmer ?";del.style.background="var(--neg)";del.style.color="#fff";
+          setTimeout(function(){if(del.isConnected){del.dataset.confirm="";del.textContent="Supprimer";del.style.background="";del.style.color=""}},4000);return}
+        var r2=await sb.from("products").delete().eq("id",p.id);if(r2.error)return gerr(frError(r2.error));load();
+      };
+      rows.appendChild(tr);
+    });
+    $("k-count").textContent=products.length;$("k-ok").textContent=ok+" / "+products.length;
+    $("k-month").textContent=eur0.format(tot);$("k-month").style.color=tot>=0?"var(--pos)":"var(--neg)";
+    $("empty").hidden=products.length>0;$("tbl").hidden=products.length===0;
+    var full=profile.plan==="free"&&products.length>=3;$("add").disabled=full;$("limitnote").hidden=!full;
+  }
+  async function load(){
+    var pr=await sb.from("profiles").select("*").eq("id",user.id).maybeSingle();
+    if(pr.data)profile=pr.data;
+    $("plan").textContent=profile.plan==="pro"?"Plan Pro":"Plan gratuit";
+    var r=await sb.from("products").select("*").order("created_at",{ascending:true});
+    if(r.error)return gerr("Impossible de charger tes produits. Recharge la page.");
+    gerr("");products=r.data;render();
+    $("s-urssaf").value=profile.urssaf_rate;$("s-cfp").value=profile.cfp_rate;$("s-vl").checked=profile.liberatoire;$("s-tva").checked=profile.vat_registered;
+  }
+  var F=["name","price","cogs","cpa","refund","payp","payf","fixed","orders"];
+  function openForm(p){
+    editing=p||null;$("pf-title").textContent=p?"Modifier le produit":"Nouveau produit";$("perr").hidden=true;
+    var d=p||{name:"",price:34.9,cogs:9.8,cpa:11,refund_rate:4,pay_pct:1.8,pay_fixed:0.25,fixed_monthly:20,orders_monthly:60};
+    $("p-name").value=d.name;$("p-price").value=d.price;$("p-cogs").value=d.cogs;$("p-cpa").value=d.cpa;$("p-refund").value=d.refund_rate;
+    $("p-payp").value=d.pay_pct;$("p-payf").value=d.pay_fixed;$("p-fixed").value=d.fixed_monthly;$("p-orders").value=d.orders_monthly;
+    $("formpanel").hidden=false;$("p-name").focus();
+  }
+  $("add").onclick=function(){openForm()};$("add2").onclick=function(){openForm()};
+  $("cancel").onclick=function(){$("formpanel").hidden=true};
+  function num(id){var v=parseFloat(String($(id).value).replace(",","."));return isFinite(v)&&v>=0?v:NaN}
+  $("pf").addEventListener("submit",async function(e){
+    e.preventDefault();var name=$("p-name").value.trim();
+    var row={name:name,price:num("p-price"),cogs:num("p-cogs"),cpa:num("p-cpa"),refund_rate:num("p-refund"),pay_pct:num("p-payp"),pay_fixed:num("p-payf"),fixed_monthly:num("p-fixed"),orders_monthly:Math.round(num("p-orders"))};
+    if(!name){$("perr").textContent="Donne un nom au produit.";$("perr").hidden=false;return}
+    if(Object.keys(row).some(function(k){return k!=="name"&&isNaN(row[k])})){$("perr").textContent="Vérifie les montants : nombres positifs uniquement.";$("perr").hidden=false;return}
+    if(row.refund_rate>100||row.pay_pct>100){$("perr").textContent="Un pourcentage ne peut pas dépasser 100 %.";$("perr").hidden=false;return}
+    $("save").disabled=true;
+    var r=editing?await sb.from("products").update(Object.assign(row,{updated_at:new Date().toISOString()})).eq("id",editing.id)
+                 :await sb.from("products").insert(Object.assign(row,{user_id:user.id}));
+    $("save").disabled=false;
+    if(r.error){$("perr").textContent=frError(r.error);$("perr").hidden=false;return}
+    if(!editing)track(products.length===0?"first_product":"product_added");
+    $("formpanel").hidden=true;load();
+  });
+  $("sf").addEventListener("submit",async function(e){
+    e.preventDefault();$("sok").hidden=true;$("serr").hidden=true;
+    var u={urssaf_rate:num("s-urssaf"),cfp_rate:num("s-cfp"),liberatoire:$("s-vl").checked,vat_registered:$("s-tva").checked};
+    if(isNaN(u.urssaf_rate)||isNaN(u.cfp_rate)||u.urssaf_rate>100){$("serr").textContent="Vérifie les taux saisis.";$("serr").hidden=false;return}
+    var r=await sb.from("profiles").update(u).eq("id",user.id);
+    if(r.error){$("serr").textContent=frError(r.error);$("serr").hidden=false;return}
+    $("sok").hidden=false;load();
+  });
+  track("app_open");load();
+})();
+</script>
+</body>
+</html>

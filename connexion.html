@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Connexion | Margia</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="/assets/base.css">
+<style>
+.auth{max-width:420px;margin:6vh auto 0;display:flex;flex-direction:column;gap:20px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:24px;display:flex;flex-direction:column;gap:16px}
+.tabs{display:grid;grid-template-columns:1fr 1fr;background:var(--sunk);border-radius:9px;padding:4px;gap:4px}
+.tabs button{border:0;background:transparent;color:var(--muted);font:600 14px var(--body);padding:9px;border-radius:7px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.btn{border:0;border-radius:9px;background:var(--accent);color:#fff;font:600 15px var(--body);padding:12px;cursor:pointer}
+.btn[disabled]{opacity:.6;cursor:wait}
+.link{background:none;border:0;color:var(--accent);font:500 13.5px var(--body);cursor:pointer;padding:0;text-align:left}
+.msg{font-size:14px;border-radius:8px;padding:10px 12px}
+.msg.err{background:color-mix(in srgb,var(--neg) 12%,transparent);color:var(--neg)}
+.msg.ok{background:color-mix(in srgb,var(--pos) 12%,transparent);color:var(--pos)}
+h1{font-size:28px}
+</style>
+</head>
+<body>
+<main class="auth">
+  <a class="brand" href="/" style="color:inherit;text-decoration:none"><svg viewBox="0 0 32 32" aria-hidden="true" width="28" height="28"><rect x="2" y="2" width="28" height="28" rx="8" fill="var(--accent)"/><path d="M9 22V11l7 7 7-7v11" fill="none" stroke="var(--surface)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Margia</a>
+  <h1 id="title">Suis la rentabilité de tes produits</h1>
+  <div class="card">
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="t-up" aria-selected="true">Créer un compte</button>
+      <button type="button" role="tab" id="t-in" aria-selected="false">Se connecter</button>
+    </div>
+    <div class="msg err" id="err" hidden></div>
+    <div class="msg ok" id="ok" hidden></div>
+    <form id="f" novalidate>
+      <fieldset>
+        <label for="email">Email<div class="field"><input id="email" type="email" autocomplete="email" required></div></label>
+        <label for="pw" id="pwl">Mot de passe<small id="pwhint">8 caractères minimum</small><div class="field"><input id="pw" type="password" autocomplete="new-password" minlength="8" required></div></label>
+        <button class="btn" id="go" type="submit">Créer mon compte gratuit</button>
+        <button class="link" id="forgot" type="button" hidden>Mot de passe oublié ?</button>
+      </fieldset>
+    </form>
+  </div>
+  <p class="note">Gratuit jusqu'à 3 produits. Aucune carte bancaire demandée.</p>
+</main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="/config.js"></script>
+<script src="/assets/sb.js"></script>
+<script>
+(function(){
+  var $=function(i){return document.getElementById(i)}, mode="up";
+  function show(id,t){$("err").hidden=true;$("ok").hidden=true;if(id){$(id).textContent=t;$(id).hidden=false}}
+  function setMode(m){
+    mode=m;$("t-up").setAttribute("aria-selected",m==="up");$("t-in").setAttribute("aria-selected",m==="in");
+    $("pwl").hidden=m==="reset";$("forgot").hidden=m!=="in";$("pwhint").hidden=m!=="up";
+    $("pw").autocomplete=m==="up"?"new-password":"current-password";
+    $("go").textContent=m==="up"?"Créer mon compte gratuit":m==="in"?"Se connecter":"Recevoir le lien de réinitialisation";
+    show();
+  }
+  $("t-up").onclick=function(){setMode("up")};$("t-in").onclick=function(){setMode("in")};
+  $("forgot").onclick=function(){setMode("reset")};
+  if(location.hash==="#connexion")setMode("in");
+  if(!window.MARGIA_READY){show("err","Les comptes ouvrent très bientôt. En attendant, le simulateur gratuit est disponible sur la page d'accueil.");$("go").disabled=true;return}
+  sb.auth.getSession().then(function(r){if(r.data.session)location.replace("/app")});
+  $("f").addEventListener("submit",async function(e){
+    e.preventDefault();var email=$("email").value.trim(),pw=$("pw").value;
+    if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return show("err","Saisis une adresse email valide.");
+    if(mode!=="reset"&&pw.length<8)return show("err","Le mot de passe doit faire au moins 8 caractères.");
+    $("go").disabled=true;
+    try{
+      if(mode==="up"){
+        var r=await sb.auth.signUp({email:email,password:pw,options:{emailRedirectTo:location.origin+"/app"}});
+        if(r.error)throw r.error;
+        if(r.data.session){track("signup");location.replace("/app")}
+        else show("ok","Compte créé. Clique sur le lien envoyé à "+email+" pour l'activer.");
+      }else if(mode==="in"){
+        var r2=await sb.auth.signInWithPassword({email:email,password:pw});
+        if(r2.error)throw r2.error;location.replace("/app");
+      }else{
+        var r3=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+"/reinitialiser"});
+        if(r3.error)throw r3.error;show("ok","Si un compte existe pour "+email+", un lien de réinitialisation vient d'être envoyé.");
+      }
+    }catch(err){show("err",frError(err))}
+    finally{$("go").disabled=false}
+  });
+})();
+</script>
+</body>
+</html>
