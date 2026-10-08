@@ -29,7 +29,7 @@ aside nav button:focus-visible{outline:2px solid var(--accent)}
 .kpi b{font-size:22px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:18px}
 .tbl{overflow-x:auto}
-table{width:100%;border-collapse:collapse;font-size:14px;min-width:640px}
+table{width:100%;border-collapse:collapse;font-size:14px;min-width:720px}
 th{text-align:left;font:600 11.5px var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:8px 10px;border-bottom:1px solid var(--line)}
 td{padding:11px 10px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
 td.n{font-family:var(--mono);white-space:nowrap}
@@ -61,11 +61,11 @@ tr:last-child td{border-bottom:0}
 </style>
 </head>
 <body>
-<div class="mtop"><span class="brand">Margia</span><nav><button data-v="products" aria-current="page">Produits</button><button data-v="settings">Compte</button><button data-v="help">Aide</button></nav></div>
+<div class="mtop"><span class="brand">Margia</span><nav><button data-v="products" aria-current="page">Produits</button><button data-v="decl">URSSAF</button><button data-v="settings">Compte</button><button data-v="help">Aide</button></nav></div>
 <div class="shell">
   <aside>
     <a class="brand" href="/" style="color:inherit;text-decoration:none"><svg viewBox="0 0 32 32" aria-hidden="true" width="26" height="26"><rect x="2" y="2" width="28" height="28" rx="8" fill="var(--accent)"/><path d="M9 22V11l7 7 7-7v11" fill="none" stroke="var(--surface)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Margia</a>
-    <nav><button data-v="products" aria-current="page">Mes produits</button><button data-v="settings">Réglages fiscaux</button><button data-v="help">Aide</button></nav>
+    <nav><button data-v="products" aria-current="page">Mes produits</button><button data-v="decl">Déclaration URSSAF</button><button data-v="settings">Réglages fiscaux</button><button data-v="help">Aide</button></nav>
     <div class="who"><span id="who">–</span><span id="plan"></span><button class="btn" id="upgrade" type="button" hidden>Passer en Pro, 7 €/mois</button><button class="btn ghost" id="billing" type="button" hidden>Gérer mon abonnement</button><button class="btn ghost" id="logout" type="button">Se déconnecter</button></div>
   </aside>
 
@@ -107,10 +107,42 @@ tr:last-child td{border-bottom:0}
           <button class="btn" type="button" id="add2">Ajouter un produit</button>
         </div>
         <div class="tbl" id="tbl" hidden>
-          <table><thead><tr><th>Produit</th><th>Prix</th><th>Net / cmd</th><th>Marge</th><th>CPA max</th><th>Net / mois</th><th>État</th><th></th></tr></thead><tbody id="rows"></tbody></table>
+          <table><thead><tr><th>Produit</th><th>Prix</th><th>Net / cmd</th><th>Marge</th><th>CPA max</th><th>ROAS min</th><th>Net / mois</th><th>État</th><th></th></tr></thead><tbody id="rows"></tbody></table>
         </div>
       </div>
       <p class="note" id="limitnote" hidden>Plan gratuit : 3 produits maximum. Passe en Pro à 7 €/mois (prix de lancement) pour des produits illimités : <a href="/tarifs">voir les tarifs</a>.</p>
+    </section>
+
+    <section class="view" id="v-decl" hidden>
+      <div class="top"><h1>Déclaration URSSAF</h1></div>
+      <div class="panel" style="margin-top:16px">
+        <form id="df" novalidate><fieldset>
+          <legend>Ce que tu déclares et ce que tu paies</legend>
+          <div class="row">
+            <label for="d-period">Période<div class="field"><select id="d-period" style="flex:1;border:0;background:transparent;color:var(--fg);font:500 15px var(--mono);padding:10px 12px;outline:none"></select></div></label>
+            <label for="d-ca">CA encaissé sur la période<small id="d-hint"></small><div class="field"><input id="d-ca" inputmode="decimal"><span>€</span></div></label>
+          </div>
+          <div class="kpis" style="margin:14px 0">
+            <div class="kpi"><span>À déclarer</span><b id="d-k-ca">–</b></div>
+            <div class="kpi"><span>À payer à l'URSSAF</span><b id="d-k-pay" style="color:var(--neg)">–</b></div>
+            <div class="kpi"><span>Bénéfice net estimé après URSSAF</span><b id="d-k-net">–</b></div>
+          </div>
+          <p class="note" id="d-detail"></p>
+          <div class="msg err" id="derr" hidden></div>
+          <div class="msg ok" id="dok" hidden></div>
+          <div class="formbar"><button class="btn" type="submit" id="d-save">Enregistrer cette période</button></div>
+        </fieldset></form>
+      </div>
+      <div class="panel" style="margin-top:16px;display:flex;flex-direction:column;gap:14px">
+        <legend>Seuils de l'année (projection)</legend>
+        <div id="d-thr"></div>
+        <p class="note">Projection sur 12 mois à partir de tes périodes enregistrées, ou de l'estimation de tes produits. Seuils 2026 à vérifier sur urssaf.fr et impots.gouv.fr.</p>
+      </div>
+      <div class="panel" style="margin-top:16px">
+        <legend>Historique</legend>
+        <div class="tbl" id="d-hist-wrap" hidden><table style="min-width:420px"><thead><tr><th>Période</th><th>CA déclaré</th><th>Payé URSSAF</th><th></th></tr></thead><tbody id="d-hist"></tbody></table></div>
+        <p class="note" id="d-hist-empty">Aucune période enregistrée. Enregistre chaque déclaration pour suivre ton année et tes seuils.</p>
+      </div>
     </section>
 
     <section class="view" id="v-settings" hidden>
@@ -163,7 +195,7 @@ tr:last-child td{border-bottom:0}
   $("logout").onclick=$("logout2").onclick=function(){sb.auth.signOut()};$("who2").textContent=user.email;
 
   function gerr(t){$("gerr").textContent=t;$("gerr").hidden=!t}
-  function views(v){["products","settings","help"].forEach(function(k){$("v-"+k).hidden=k!==v});
+  function views(v){["products","decl","settings","help"].forEach(function(k){$("v-"+k).hidden=k!==v});
     document.querySelectorAll("[data-v]").forEach(function(b){b.setAttribute("aria-current",b.dataset.v===v?"page":"false")})}
   document.querySelectorAll("[data-v]").forEach(function(b){b.onclick=function(){views(b.dataset.v)}});
 
@@ -180,10 +212,11 @@ tr:last-child td{border-bottom:0}
       var r=calc(p);tot+=r.month;if(r.net>0)ok++;
       var st=r.net<0?["neg","Déficitaire"]:r.margin<0.10?["warn","Marge fragile"]:["pos","Rentable"];
       var tr=document.createElement("tr");
-      tr.innerHTML='<td></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td><span class="chip '+st[0]+'"></span></td><td><div class="acts"><button type="button" data-e>Modifier</button><button type="button" data-d>Supprimer</button></div></td>';
+      tr.innerHTML='<td></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td class="n"></td><td><span class="chip '+st[0]+'"></span></td><td><div class="acts"><button type="button" data-e>Modifier</button><button type="button" data-d>Supprimer</button></div></td>';
       var c=tr.children;c[0].textContent=p.name;c[1].textContent=eur.format(p.price);c[2].textContent=eur.format(r.net);c[2].style.color=r.net>=0?"var(--pos)":"var(--neg)";
       c[3].textContent=(r.margin*100).toLocaleString("fr-FR",{maximumFractionDigits:1})+" %";c[4].textContent=r.cpaMax>0?eur.format(r.cpaMax):"aucun";
-      c[5].textContent=eur0.format(r.month);c[6].firstChild.textContent=st[1];
+      c[5].textContent=r.cpaMax>0?(p.price/r.cpaMax).toLocaleString("fr-FR",{maximumFractionDigits:2}):"–";c[5].title="ROAS minimum pour ne pas perdre d'argent sur ce produit";
+      c[6].textContent=eur0.format(r.month);c[7].firstChild.textContent=st[1];
       tr.querySelector("[data-e]").onclick=function(){openForm(p)};
       var del=tr.querySelector("[data-d]");del.onclick=async function(){
         if(del.dataset.confirm!=="1"){del.dataset.confirm="1";del.textContent="Confirmer ?";del.style.background="var(--neg)";del.style.color="#fff";
@@ -255,8 +288,76 @@ tr:last-child td{border-bottom:0}
     if(r.error){$("serr").textContent=frError(r.error);$("serr").hidden=false;return}
     $("sok").hidden=false;load();
   });
+  // ---- Déclaration URSSAF ----
+  var PLAFOND_MICRO=188700, SEUIL_TVA=85000, decls=[], histOff=false, caTouched=false;
+  function rate(){return (+profile.urssaf_rate+ +profile.cfp_rate+(profile.liberatoire?1:0))/100}
+  function monthsOf(per){return /T/.test(per)?3:1}
+  function estMonth(){var ca=0,net=0;products.forEach(function(p){var ht=profile.vat_registered?p.price/1.2:+p.price;ca+=ht*p.orders_monthly;net+=calc(p).month});return {ca:ca,net:net}}
+  function perLabel(per){var y=per.slice(0,4),m=per.slice(5);
+    if(m[0]==="T")return m+" "+y;return new Date(+y,+m-1,1).toLocaleDateString("fr-FR",{month:"long",year:"numeric"})}
+  (function buildPeriods(){
+    var sel=$("d-period"),d=new Date(),o=[];
+    for(var i=1;i<=12;i++){var x=new Date(d.getFullYear(),d.getMonth()-i,1);o.push(x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0"))}
+    var q=Math.floor(d.getMonth()/3),y=d.getFullYear();
+    for(var j=0;j<4;j++){q--;if(q<0){q=3;y--}o.push(y+"-T"+(q+1))}
+    o.forEach(function(v){var op=document.createElement("option");op.value=v;op.textContent=perLabel(v)+(/T/.test(v)?" (trimestriel)":" (mensuel)");sel.appendChild(op)});
+  })();
+  function numv(v){v=parseFloat(String(v).replace(",","."));return isFinite(v)&&v>=0?v:NaN}
+  function renderDecl(){
+    var per=$("d-period").value,k=monthsOf(per),e=estMonth(),saved=decls.find(function(x){return x.period===per});
+    $("d-hint").textContent=profile.vat_registered?"Montant hors TVA":"Encaissements réels, pas les commandes en attente";
+    if(!caTouched)$("d-ca").value=saved?saved.revenue:Math.round(e.ca*k);
+    var ca=numv($("d-ca").value);if(isNaN(ca))ca=0;
+    var r=rate(),pay=ca*r,estCa=e.ca*k;
+    $("d-k-ca").textContent=eur0.format(ca);$("d-k-pay").textContent=eur.format(pay);
+    var net=estCa>0?e.net*k*(ca/estCa):0;$("d-k-net").textContent=estCa>0?eur0.format(net):"–";
+    $("d-k-net").style.color=net>=0?"var(--pos)":"var(--neg)";
+    $("d-detail").textContent="Cotisations "+(+profile.urssaf_rate).toLocaleString("fr-FR")+" % + formation pro "+(+profile.cfp_rate).toLocaleString("fr-FR")+" %"+(profile.liberatoire?" + impôt libératoire 1 %":"")+" = "+(r*100).toLocaleString("fr-FR",{maximumFractionDigits:2})+" % du CA. Calculé sur le chiffre d'affaires, pas sur ton bénéfice : réserve ce montant dès l'encaissement."+(saved?"":" Montant pré-rempli depuis tes produits, remplace-le par ton CA réel.");
+    // seuils
+    var yr=String(new Date().getFullYear()),cur=decls.filter(function(x){return x.period.slice(0,4)===yr}),m=0,s=0;
+    cur.forEach(function(x){m+=monthsOf(x.period);s+=+x.revenue});
+    var proj=m>0?s/m*12:e.ca*12,src=m>0?"tes "+cur.length+" période(s) enregistrée(s) en "+yr:"l'estimation de tes produits";
+    var box=$("d-thr");box.innerHTML="";
+    [["Plafond micro-entreprise (vente)",PLAFOND_MICRO],["Franchise de TVA (vente)",SEUIL_TVA]].forEach(function(t){
+      var pct=t[1]?proj/t[1]:0,col=pct>=1?"var(--neg)":pct>=.8?"var(--warn)":"var(--pos)";
+      var w=document.createElement("div");w.style.cssText="display:flex;flex-direction:column;gap:6px;margin-bottom:12px";
+      w.innerHTML='<div style="display:flex;justify-content:space-between;gap:10px;font-size:14px;flex-wrap:wrap"><span></span><b style="font:500 14px var(--mono)"></b></div><div style="height:8px;border-radius:99px;background:var(--sunk);overflow:hidden"><div class="bar" style="height:100%;border-radius:99px"></div></div>';
+      w.querySelector("span").textContent=t[0];w.querySelector("b").textContent=eur0.format(proj)+" / "+eur0.format(t[1]);
+      var bar=w.querySelector(".bar");bar.style.width=Math.min(100,pct*100)+"%";bar.style.background=col;
+      if(pct>=.8){var n=document.createElement("span");n.className="note";n.style.color=col;n.textContent=pct>=1?"Seuil dépassé au rythme actuel : anticipe le changement de régime.":"Tu approches du seuil : surveille tes prochains mois.";w.appendChild(n)}
+      box.appendChild(w);
+    });
+    var src2=document.createElement("p");src2.className="note";src2.textContent="Projection basée sur "+src+".";box.appendChild(src2);
+    // historique
+    var hb=$("d-hist");hb.innerHTML="";
+    decls.forEach(function(x){var tr=document.createElement("tr");tr.innerHTML='<td></td><td class="n"></td><td class="n"></td><td><div class="acts"><button type="button">Supprimer</button></div></td>';
+      tr.children[0].textContent=perLabel(x.period);tr.children[1].textContent=eur0.format(x.revenue);tr.children[2].textContent=eur.format(x.contributions);
+      tr.querySelector("button").onclick=async function(){var r2=await sb.from("declarations").delete().eq("id",x.id);if(r2.error)return gerr(frError(r2.error));loadDecl()};
+      hb.appendChild(tr)});
+    $("d-hist-wrap").hidden=decls.length===0;$("d-hist-empty").hidden=decls.length>0;
+    if(histOff)$("d-hist-empty").textContent="Historique indisponible pour le moment.";
+  }
+  async function loadDecl(){
+    var r=await sb.from("declarations").select("*").order("period",{ascending:false});
+    if(r.error){histOff=true;decls=[]}else{histOff=false;decls=r.data}
+    renderDecl();
+  }
+  $("d-period").onchange=function(){caTouched=false;$("dok").hidden=true;renderDecl()};
+  $("d-ca").oninput=function(){caTouched=true;renderDecl()};
+  $("df").addEventListener("submit",async function(e){
+    e.preventDefault();$("derr").hidden=true;$("dok").hidden=true;
+    var ca=numv($("d-ca").value);if(isNaN(ca)){$("derr").textContent="Saisis un montant positif.";$("derr").hidden=false;return}
+    if(histOff){$("derr").textContent="L'enregistrement n'est pas encore activé sur ton compte. Le calcul ci-dessus reste valable.";$("derr").hidden=false;return}
+    $("d-save").disabled=true;
+    var r=await sb.from("declarations").upsert({user_id:user.id,period:$("d-period").value,revenue:Math.round(ca*100)/100,contributions:Math.round(ca*rate()*100)/100},{onConflict:"user_id,period"});
+    $("d-save").disabled=false;
+    if(r.error){$("derr").textContent=frError(r.error);$("derr").hidden=false;return}
+    track("declaration_saved");caTouched=false;$("dok").textContent="Période enregistrée.";$("dok").hidden=false;loadDecl();
+  });
+  document.querySelectorAll('[data-v="decl"]').forEach(function(b){b.addEventListener("click",function(){track("decl_open");renderDecl()})});
+
   try{var fk="margia_signup_"+user.id;if(!localStorage.getItem(fk)&&Date.now()-new Date(user.created_at).getTime()<864e5){track("signup_confirmed")}localStorage.setItem(fk,"1")}catch(_){}
-  track("app_open");load();
+  track("app_open");load().then(loadDecl);
 })();
 </script>
 </body>
