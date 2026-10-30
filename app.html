@@ -61,11 +61,11 @@ tr:last-child td{border-bottom:0}
 </style>
 </head>
 <body>
-<div class="mtop"><span class="brand">Margia</span><nav><button data-v="products" aria-current="page">Produits</button><button data-v="decl">URSSAF</button><button data-v="settings">Compte</button><button data-v="help">Aide</button></nav></div>
+<div class="mtop"><span class="brand">Margia</span><nav><button data-v="products" aria-current="page">Produits</button><button data-v="sales">Ventes</button><button data-v="decl">URSSAF</button><button data-v="settings">Compte</button><button data-v="help">Aide</button></nav></div>
 <div class="shell">
   <aside>
     <a class="brand" href="/" style="color:inherit;text-decoration:none"><svg viewBox="0 0 32 32" aria-hidden="true" width="26" height="26"><rect x="2" y="2" width="28" height="28" rx="8" fill="var(--accent)"/><path d="M9 22V11l7 7 7-7v11" fill="none" stroke="var(--surface)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg> Margia</a>
-    <nav><button data-v="products" aria-current="page">Mes produits</button><button data-v="decl">Déclaration URSSAF</button><button data-v="settings">Réglages fiscaux</button><button data-v="help">Aide</button></nav>
+    <nav><button data-v="products" aria-current="page">Mes produits</button><button data-v="sales">Ventes &amp; e-reporting</button><button data-v="decl">Déclaration URSSAF</button><button data-v="settings">Réglages fiscaux</button><button data-v="help">Aide</button></nav>
     <div class="who"><span id="who">–</span><span id="plan"></span><button class="btn" id="upgrade" type="button" hidden>Passer en Pro, 7 €/mois</button><button class="btn ghost" id="billing" type="button" hidden>Gérer mon abonnement</button><button class="btn ghost" id="logout" type="button">Se déconnecter</button></div>
   </aside>
 
@@ -111,6 +111,37 @@ tr:last-child td{border-bottom:0}
         </div>
       </div>
       <p class="note" id="limitnote" hidden>Plan gratuit : 3 produits maximum. Passe en Pro à 7 €/mois (prix de lancement) pour des produits illimités : <a href="/tarifs">voir les tarifs</a>.</p>
+    </section>
+
+    <section class="view" id="v-sales" hidden>
+      <div class="top"><h1>Ventes &amp; e-reporting</h1><span class="chip warn">Obligatoire au 1er sept. 2027</span></div>
+      <div class="panel" style="margin-top:16px;display:flex;flex-direction:column;gap:14px">
+        <legend>Importer tes ventes</legend>
+        <p class="note" style="margin:0">Exporte tes commandes (Shopify : Commandes &gt; Exporter &gt; CSV, Etsy : Paramètres &gt; Options &gt; Télécharger les données, ou tout tableur avec date + montant). Tu peux importer plusieurs fichiers : ils sont additionnés. <b>Le calcul se fait dans ton navigateur, aucune commande n'est envoyée sur nos serveurs.</b></p>
+        <label class="btn" style="align-self:flex-start;display:inline-flex;gap:8px" for="s-file">Choisir un ou plusieurs fichiers CSV<input type="file" id="s-file" accept=".csv,text/csv" multiple hidden></label>
+        <div id="s-files" class="note"></div>
+        <div id="s-map" hidden style="display:flex;flex-direction:column;gap:10px">
+          <p class="note" style="margin:0" id="s-map-t"></p>
+          <div class="row" id="s-map-f"></div>
+          <div class="formbar" style="justify-content:flex-start"><button class="btn" type="button" id="s-map-ok">Utiliser ces colonnes</button></div>
+        </div>
+        <div class="row">
+          <label for="s-siren">Ton SIREN<small>9 chiffres, pour le brouillon de déclaration</small><div class="field"><input id="s-siren" inputmode="numeric" maxlength="11" placeholder="123 456 789"></div></label>
+        </div>
+        <div class="msg err" id="s-err" hidden></div>
+      </div>
+      <div class="kpis" id="s-kpis" hidden style="margin-top:16px">
+        <div class="kpi"><span>Ventes aux particuliers (France)</span><b id="s-k-b2c">–</b></div>
+        <div class="kpi"><span>Ventes à l'étranger</span><b id="s-k-intl">–</b></div>
+        <div class="kpi"><span>Ventes à des pros (facture électronique)</span><b id="s-k-b2b">–</b></div>
+      </div>
+      <div class="panel" id="s-res" hidden style="margin-top:16px;display:flex;flex-direction:column;gap:12px">
+        <legend>Par bimestre (rythme de la franchise de TVA)</legend>
+        <div class="tbl"><table style="min-width:640px"><thead><tr><th>Période</th><th>Particuliers FR</th><th>Étranger</th><th>Pros FR</th><th>CA HT</th><th></th></tr></thead><tbody id="s-rows"></tbody></table></div>
+        <div class="formbar" style="justify-content:flex-start"><button class="btn ghost" type="button" id="s-csv">Télécharger le récap (CSV)</button><button class="btn ghost" type="button" id="s-reset">Vider l'import</button></div>
+        <div class="msg warn" id="s-b2b-warn" hidden style="background:color-mix(in srgb,var(--warn) 14%,transparent);color:var(--warn)"></div>
+        <p class="note" style="margin:0">Particuliers en France et clients à l'étranger : e-reporting (montant total + nombre de transactions). Clients pros en France : pas d'e-reporting, mais une facture électronique via une plateforme agréée. Le brouillon généré est à transmettre par ta plateforme agréée ; la connexion directe arrive bientôt dans Margia. Règles à vérifier sur impots.gouv.fr.</p>
+      </div>
     </section>
 
     <section class="view" id="v-decl" hidden>
@@ -173,6 +204,7 @@ tr:last-child td{border-bottom:0}
       <div class="panel faq" style="margin-top:16px">
         <details open><summary>Comment est calculé le bénéfice net ?</summary><p>Prix de vente moins coût fournisseur, coût pub par vente, frais de paiement, remboursements, part des charges fixes, cotisations URSSAF (et TVA si tu la collectes).</p></details>
         <details><summary>C'est quoi le CPA max ?</summary><p>Le coût pub par vente au-delà duquel le produit te fait perdre de l'argent. Compare-le au CPA réel affiché dans Meta Ads ou Google Ads.</p></details>
+        <details><summary>C'est quoi l'e-reporting ?</summary><p>À partir du 1er septembre 2027, les micro-entreprises qui vendent à des particuliers ou à l'étranger devront transmettre régulièrement le total de leurs ventes et le nombre de transactions via une plateforme agréée, même en franchise de TVA. Les ventes à des pros en France passeront, elles, par une facture électronique. Importe tes exports de commandes dans « Ventes &amp; e-reporting » : Margia trie et totalise tout pour toi.</p></details>
         <details><summary>Mes données sont-elles privées ?</summary><p>Oui. Chaque compte ne voit que ses propres produits, la base est protégée par des règles d'accès par utilisateur.</p></details>
         <details><summary>Une question ou un bug ?</summary><p>Écris à <span style="user-select:all">samirdeh782@gmail.com</span>.</p></details>
       </div>
@@ -183,6 +215,7 @@ tr:last-child td{border-bottom:0}
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <script src="/config.js"></script>
 <script src="/assets/sb.js"></script>
+<script src="/assets/ereport.js"></script>
 <script>
 (async function(){
   var $=function(i){return document.getElementById(i)};
@@ -195,7 +228,7 @@ tr:last-child td{border-bottom:0}
   $("logout").onclick=$("logout2").onclick=function(){sb.auth.signOut()};$("who2").textContent=user.email;
 
   function gerr(t){$("gerr").textContent=t;$("gerr").hidden=!t}
-  function views(v){["products","decl","settings","help"].forEach(function(k){$("v-"+k).hidden=k!==v});
+  function views(v){["products","sales","decl","settings","help"].forEach(function(k){$("v-"+k).hidden=k!==v});
     document.querySelectorAll("[data-v]").forEach(function(b){b.setAttribute("aria-current",b.dataset.v===v?"page":"false")})}
   document.querySelectorAll("[data-v]").forEach(function(b){b.onclick=function(){views(b.dataset.v)}});
 
@@ -355,6 +388,61 @@ tr:last-child td{border-bottom:0}
     track("declaration_saved");caTouched=false;$("dok").textContent="Période enregistrée.";$("dok").hidden=false;loadDecl();
   });
   document.querySelectorAll('[data-v="decl"]').forEach(function(b){b.addEventListener("click",function(){track("decl_open");renderDecl()})});
+
+  // ---- Ventes & e-reporting ----
+  var sTx=[],sFiles=[],sPending=null,sAgg=[];
+  try{$("s-siren").value=localStorage.getItem("margia_siren_"+user.id)||""}catch(_){}
+  $("s-siren").oninput=function(){try{localStorage.setItem("margia_siren_"+user.id,$("s-siren").value)}catch(_){}};
+  function sErr(t){$("s-err").textContent=t||"";$("s-err").hidden=!t}
+  function biLabel(k){var y=k.slice(0,4),b=+k.slice(6),m=["janv.","févr.","mars","avr.","mai","juin","juil.","août","sept.","oct.","nov.","déc."];return m[2*b-2]+" – "+m[2*b-1]+" "+y}
+  function cell(c){return c.n?eur0.format(c.ht)+' <span class="note">('+c.n+')</span>':'<span class="note">–</span>'}
+  function dl(name,text,type){var a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type:type}));a.download=name;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove()},500)}
+  function renderSales(){
+    $("s-files").textContent=sFiles.length?sFiles.join(" · "):"";
+    sAgg=MargiaER.aggregate(sTx);var has=sAgg.length>0;$("s-res").hidden=!has;$("s-kpis").hidden=!has;if(!has)return;
+    var t={b2c:0,intl:0,b2b:0,nb2b:0};sAgg.forEach(function(p){t.b2c+=p.b2c.ht;t.intl+=p.intl.ht;t.b2b+=p.b2b.ht;t.nb2b+=p.b2b.n});
+    $("s-k-b2c").textContent=eur0.format(t.b2c);$("s-k-intl").textContent=eur0.format(t.intl);$("s-k-b2b").textContent=eur0.format(t.b2b);
+    $("s-b2b-warn").hidden=!t.nb2b;$("s-b2b-warn").textContent=t.nb2b+" commande(s) avec un nom de société : si ce sont des clients pros français, elles devront faire l'objet d'une facture électronique à partir de septembre 2027.";
+    var rows=$("s-rows");rows.innerHTML="";
+    sAgg.forEach(function(p){var tr=document.createElement("tr");
+      tr.innerHTML='<td></td><td class="n">'+cell(p.b2c)+'</td><td class="n">'+cell(p.intl)+'</td><td class="n">'+cell(p.b2b)+'</td><td class="n"></td><td><div class="acts"><button type="button" data-j>Brouillon e-reporting</button><button type="button" data-u>Vers URSSAF</button></div></td>';
+      tr.children[0].textContent=biLabel(p.period);tr.children[4].textContent=eur0.format(p.totalHt);
+      tr.querySelector("[data-j]").onclick=function(){
+        var sir=($("s-siren").value||"").replace(/\D/g,"");if(sir&&sir.length!==9)return sErr("Le SIREN doit faire 9 chiffres.");sErr("");
+        dl("e-reporting-"+p.period+".json",JSON.stringify(MargiaER.draft(p,sir,!profile.vat_registered),null,2),"application/json");track("ereport_draft")};
+      tr.querySelector("[data-u]").onclick=function(){
+        var ms=Object.keys(p.months).sort().reverse(),sel=$("d-period"),m=ms.find(function(x){return [].some.call(sel.options,function(o){return o.value===x})});
+        if(!m)return sErr("Cette période n'est pas dans la liste des déclarations URSSAF (12 derniers mois).");
+        sel.value=m;caTouched=true;$("d-ca").value=Math.round(p.months[m]*100)/100;views("decl");renderDecl();track("ereport_to_urssaf");
+        $("dok").textContent="CA de "+perLabel(m)+" repris depuis tes ventes importées. Vérifie puis enregistre.";$("dok").hidden=false};
+      rows.appendChild(tr)});
+  }
+  function ingest(name,parsed,mapping){
+    var r=MargiaER.normalize(parsed,mapping);
+    if(r.needMapping||(r.fmt==="generic"&&!mapping)){sPending={name:name,parsed:parsed};showMap(parsed.headers,r.mapping||MargiaER.guessMapping(parsed.headers));return}
+    if(!r.tx.length)return sErr("Aucune vente encaissée trouvée dans "+name+".");
+    sTx=sTx.concat(r.tx);sFiles.push(name+" : "+r.tx.length+" vente(s)"+(r.fmt==="shopify"?" Shopify":r.fmt==="etsy"?" Etsy":"")+(r.skipped?", "+r.skipped+" ignorée(s) (non payées, remboursées ou incomplètes)":""));
+    $("s-map").hidden=true;sPending=null;track("ereport_import");renderSales();
+  }
+  function showMap(headers,m){
+    var f=$("s-map-f");f.innerHTML="";$("s-map-t").textContent="Format non reconnu automatiquement : indique quelles colonnes utiliser.";
+    [["date","Date d'encaissement",1],["amount","Montant TTC",1],["country","Pays du client",0],["company","Société du client",0]].forEach(function(d){
+      var l=document.createElement("label");l.textContent=d[1]+(d[2]?"":" (facultatif)");var w=document.createElement("div");w.className="field";
+      var s=document.createElement("select");s.id="s-m-"+d[0];s.style.cssText="flex:1;border:0;background:transparent;color:var(--fg);font:500 14px var(--body);padding:10px 12px;outline:none";
+      s.innerHTML='<option value="">—</option>';headers.forEach(function(h){var o=document.createElement("option");o.value=o.textContent=h;s.appendChild(o)});s.value=m[d[0]]||"";
+      w.appendChild(s);l.appendChild(w);f.appendChild(l)});
+    $("s-map").hidden=false;
+  }
+  $("s-map-ok").onclick=function(){if(!sPending)return;var g=function(k){return $("s-m-"+k).value};
+    if(!g("date")||!g("amount"))return sErr("Choisis au moins la date et le montant.");sErr("");
+    ingest(sPending.name,sPending.parsed,{date:g("date"),amount:g("amount"),country:g("country"),company:g("company")})};
+  $("s-file").onchange=async function(){sErr("");var fs=[].slice.call(this.files||[]);this.value="";
+    for(var i=0;i<fs.length;i++){if(fs[i].size>25e6){sErr(fs[i].name+" est trop volumineux (25 Mo max).");continue}
+      try{var p=MargiaER.parseCSV(await fs[i].text());if(!p.headers.length){sErr(fs[i].name+" est vide.");continue}ingest(fs[i].name,p);if(sPending)break}
+      catch(_){sErr("Impossible de lire "+fs[i].name+".")}}};
+  $("s-csv").onclick=function(){dl("margia-ventes-recap.csv","\uFEFF"+MargiaER.toCSV(sAgg),"text/csv;charset=utf-8")};
+  $("s-reset").onclick=function(){sTx=[];sFiles=[];sErr("");renderSales()};
+  document.querySelectorAll('[data-v="sales"]').forEach(function(b){b.addEventListener("click",function(){track("sales_open")})});
 
   try{var fk="margia_signup_"+user.id;if(!localStorage.getItem(fk)&&Date.now()-new Date(user.created_at).getTime()<864e5){track("signup_confirmed")}localStorage.setItem(fk,"1")}catch(_){}
   track("app_open");load().then(loadDecl);
